@@ -1,0 +1,10 @@
+vendor/**/.git
+vendor/*/
+.tmp
+.idea
+.DS_Store
+*.iml
+dashboard-env.sh
+.camunda-ci-dashboard.json
+bin
+bindata_assetfs.go

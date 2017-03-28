@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Camunda BPM - Broken Jobs</title>
+    <link rel="stylesheet" href="static/css/materialize.min.css">
+    <link rel="stylesheet" href="static/css/main.css">
+    <link rel="stylesheet" href="static/css/icon.css">
+    <link rel='shortcut icon' type='image/x-icon' href='favicon.ico' />
+  </head>
+  <body>
+
+    <nav>
+      <div class="nav-wrapper red darken-3">
+        <div class="row">
+          <div class="col s12">
+            <span class="brand-logo">Camunda BPM - Broken Jobs</span>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div id="content" class="row">
+      <div id="preloader" class="col s8 offset-s2">
+        <h5 class="center-align grey-text">Loading...</h5>
+        <div class="progress">
+          <div id="bar" class="determinate"></div>
+        </div>
+      </div>
+    </div>
+
+    <script id="jenkins-card" type="text/x-handlebars-template">
+      <div class="col s12 m6 l4">
+        <div class="card">
+          <div class="card-content">
+            <span class="card-title grey-text">
+              <a href="{{jenkins.url}}/view/Broken/" target="_blank" class="blue-grey-text">{{jenkins.name}}</a>
+              {{#if jenkins.error}}
+              <span class="new badge" data-badge-caption="">
+              <i class="material-icons red-text small" title="Unable to connect">report_problem</i>
+                Not available
+              </span>
+              {{else}}
+              <span class="new badge blue-grey lighten-2" data-badge-caption="Broken">
+              {{jenkins.jobs.length}}
+              </span>
+              <span class="new badge blue-grey lighten-2" data-badge-caption="Queued">
+              {{jenkins.buildQueueSize}}
+              </span>
+              <span class="new badge blue-grey lighten-2" data-badge-caption="Executors">
+              {{jenkins.busyExecutors}}
+              </span>
+              {{/if}}
+            </span>
+            {{{content}}}
+          </div>
+        </div>
+      </div>
+    </script>
+
+    <script id="jobs-collection" type="text/x-handlebars-template">
+      {{#if jobs}}
+      <ul class="collection">
+      {{#each jobs}}
+        <li class="collection-item {{color}} lighten-5">
+          <span class="title">
+          {{#if running}}
+          <a href="{{url}}" target="_blank" class="blue-grey-text blink">{{fullDisplayName}}</a>
+          {{else}}
+          <a href="{{url}}" target="_blank" class="blue-grey-text">{{fullDisplayName}}</a>
+          {{/if}}
+          </span>
+          {{#if tests.failed}}
+          <a href="{{url}}lastCompletedBuild/testReport" target="_blank">
+            <span class="red lighten-1 new badge" data-badge-caption="tests failed">
+              {{tests.failed}} of {{tests.total}}
+            </span>
+          </a>
+          {{/if}}
+          {{#if foundFailureCauses}}
+          <p class="valign">
+            {{#each foundFailureCauses}}
+            {{description}}
+            {{/each}}
+          </p>
+          {{/if}}
+        </li>
+      {{/each}}
+      </ul>
+
+      {{/if}}
+    </script>
+
+    <script src="static/js/jquery-2.2.4.min.js"></script>
+    <script src="static/js/handlebars.min.js"></script>
+    <script src="static/js/materialize.min.js"></script>
+    <script>
+
+      // helper functions
+      function stringStartsWith (string, prefix) {
+        return string.slice(0, prefix.length) == prefix;
+      }
+
+      // templates
+      var jenkinsCardTemplate = Handlebars.compile($("#jenkins-card").html());
+      var jobsCollectionTemplate = Handlebars.compile($("#jobs-collection").html());
+
+      Handlebars.registerHelper('json', function(context) {
+        return JSON.stringify(context);
+      });
+
+      $(document).ready(function() {
+        $(".button-collapse").sideNav();
+        fetchData();
+      });
+
+      function fetchData() {
+        $.ajax({
+          url: 'dashboard',
+          dataType: 'json'
+        })
+        .done(function (data) {
+          displayData(data)
+        })
+      }
+
+      function mapJobDetails(jobs) {
+        return $.map(jobs, function(job) {
+
+          job.lastBuild.actions.forEach(function(action) {
+            if (action.hasOwnProperty('foundFailureCauses')) {
+              /**
+                {"foundFailureCauses":[
+                  {
+                    "categories": ["Infrastructure"],
+                    "description":"Build took to long to complete and was aborted."
+                  }
+                ]}
+              */
+              job.foundFailureCauses = action['foundFailureCauses'];
+            }
+            if (action.hasOwnProperty('failCount')) {
+              job.tests = {
+                failed: action['failCount'] || 0,
+                skipped: action['skipCount'] || 0,
+                total: action['totalCount'] || 0
+              }
+            }
+          });
+
+          delete job['lastBuild'];
+
+          if (typeof job.fullDisplayName === 'undefined') {
+            job.fullDisplayName = job.name
+          }
+          return job;
+        });
+      }
+
+      // ignore not build / successful / disabled jobs or those which name is starting with test- prefix
+      function filterJobs(jobs) {
+        const regex = /Camunda Optimize » (?:master)/g;
+
+        return $.grep(jobs, function(job) {
+          var includeJob = job.color !== "notbuilt" && job.color !== "blue" && job.color !== "disabled" &&
+              !stringStartsWith(job.name.toLowerCase(), 'test-') &&
+              job.name !== "community-extension-camunda-bpm-osgi";
+
+          if (includeJob && job.fullDisplayName !== undefined && stringStartsWith(job.fullDisplayName, 'Camunda Optimize »')) {
+            includeJob = includeJob && regex.test(job.fullDisplayName)
+          }
+
+          return includeJob;
+        });
+      }
+
+      // map status to color
+      function mapStatusColor(jobs) {
+        return $.map(jobs, function(job) {
+          switch(job.color) {
+            case "blue_anime":
+              job.running = true;
+            case "blue":
+              job.color = "green";
+              break;
+            case "red_anime":
+              job.running = true;
+            case "red":
+              job.color = "red";
+              break;
+            case "yellow_anime":
+              job.running = true;
+            case "yellow":
+              job.color = "amber";
+              break;
+            case "aborted_anime":
+              job.running = true;
+            case "aborted":
+              job.color = "blue-grey";
+              break;
+            default:
+              job.color = "teal";
+          }
+          return job;
+        });
+      }
+
+      function displayData(jenkis) {
+        jenkis.forEach(function(jenkins) {
+          var jobs = filterJobs(jenkins.jobs);
+          jenkins.jobs = mapStatusColor(jobs);
+          jenkins.jobs = mapJobDetails(jobs);
+        });
+
+        jenkis.sort(function(a,b) {
+          return b.jobs.length - a.jobs.length;
+        });
+
+        $("#preloader").remove();
+
+        jenkis.forEach(displayJenkins);
+      }
+
+      function displayJenkins(jenkins) {
+        var content = jobsCollectionTemplate(jenkins);
+        var card = jenkinsCardTemplate({jenkins: jenkins, content: content});
+        $("#content").append(card);
+      }
+
+    </script>
+  </body>
+</html>

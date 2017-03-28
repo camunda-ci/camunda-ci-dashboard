@@ -1,0 +1,401 @@
+{
+  "busyExecutors" : 5,
+  "computer" : [
+    {
+      "actions" : [
+        {
+          
+        },
+        {
+          
+        }
+      ],
+      "displayName" : "master",
+      "executors" : [
+        {
+          
+        }
+      ],
+      "icon" : "computer.png",
+      "iconClassName" : "icon-computer",
+      "idle" : true,
+      "jnlpAgent" : false,
+      "launchSupported" : true,
+      "loadStatistics" : {
+        
+      },
+      "manualLaunchAllowed" : true,
+      "monitorData" : {
+        "hudson.node_monitors.SwapSpaceMonitor" : {
+          "availablePhysicalMemory" : 3953635328,
+          "availableSwapSpace" : 5627936768,
+          "totalPhysicalMemory" : 25239531520,
+          "totalSwapSpace" : 6291451904
+        },
+        "hudson.node_monitors.ArchitectureMonitor" : "Linux (amd64)",
+        "hudson.node_monitors.ResponseTimeMonitor" : {
+          "average" : 0
+        },
+        "hudson.node_monitors.TemporarySpaceMonitor" : {
+          "path" : "/tmp",
+          "size" : 105467936768
+        },
+        "hudson.node_monitors.DiskSpaceMonitor" : {
+          "path" : "/var/lib/jenkins",
+          "size" : 105467936768
+        },
+        "hudson.node_monitors.ClockMonitor" : {
+          "diff" : 0
+        }
+      },
+      "numExecutors" : 1,
+      "offline" : false,
+      "offlineCause" : null,
+      "offlineCauseReason" : "",
+      "oneOffExecutors" : [
+        
+      ],
+      "temporarilyOffline" : false
+    },
+    {
+      "actions" : [
+        {
+          
+        },
+        {
+          
+        }
+      ],
+      "displayName" : "ci4.camunda.loc-eda7ea28792f",
+      "executors" : [
+        {
+          
+        }
+      ],
+      "icon" : "computer.png",
+      "iconClassName" : "icon-computer",
+      "idle" : false,
+      "jnlpAgent" : false,
+      "launchSupported" : true,
+      "loadStatistics" : {
+        
+      },
+      "manualLaunchAllowed" : true,
+      "monitorData" : {
+        "hudson.node_monitors.SwapSpaceMonitor" : {
+          "availablePhysicalMemory" : 9431818240,
+          "availableSwapSpace" : 4190441472,
+          "totalPhysicalMemory" : 21011468288,
+          "totalSwapSpace" : 4194299904
+        },
+        "hudson.node_monitors.ArchitectureMonitor" : "Linux (amd64)",
+        "hudson.node_monitors.ResponseTimeMonitor" : {
+          "average" : 345
+        },
+        "hudson.node_monitors.TemporarySpaceMonitor" : {
+          "path" : "/tmp",
+          "size" : 104191967232
+        },
+        "hudson.node_monitors.DiskSpaceMonitor" : {
+          "path" : "/home/camunda",
+          "size" : 104191967232
+        },
+        "hudson.node_monitors.ClockMonitor" : {
+          "diff" : 74861
+        }
+      },
+      "numExecutors" : 1,
+      "offline" : false,
+      "offlineCause" : null,
+      "offlineCauseReason" : "",
+      "oneOffExecutors" : [
+        
+      ],
+      "temporarilyOffline" : false
+    },
+    {
+      "actions" : [
+        {
+          
+        },
+        {
+          
+        }
+      ],
+      "displayName" : "dvm05.camunda.loc-230a6acb9b72",
+      "executors" : [
+        {
+          
+        }
+      ],
+      "icon" : "computer.png",
+      "iconClassName" : "icon-computer",
+      "idle" : false,
+      "jnlpAgent" : false,
+      "launchSupported" : true,
+      "loadStatistics" : {
+        
+      },
+      "manualLaunchAllowed" : true,
+      "monitorData" : {
+        "hudson.node_monitors.SwapSpaceMonitor" : {
+          "availablePhysicalMemory" : 10624950272,
+          "availableSwapSpace" : 4139597824,
+          "totalPhysicalMemory" : 25239080960,
+          "totalSwapSpace" : 4194299904
+        },
+        "hudson.node_monitors.ArchitectureMonitor" : "Linux (amd64)",
+        "hudson.node_monitors.ResponseTimeMonitor" : {
+          "average" : 284
+        },
+        "hudson.node_monitors.TemporarySpaceMonitor" : {
+          "path" : "/tmp",
+          "size" : 104818081792
+        },
+        "hudson.node_monitors.DiskSpaceMonitor" : {
+          "path" : "/home/camunda",
+          "size" : 104818081792
+        },
+        "hudson.node_monitors.ClockMonitor" : {
+          "diff" : 4639
+        }
+      },
+      "numExecutors" : 1,
+      "offline" : false,
+      "offlineCause" : null,
+      "offlineCauseReason" : "",
+      "oneOffExecutors" : [
+        
+      ],
+      "temporarilyOffline" : false
+    },
+    {
+      "actions" : [
+        {
+          
+        },
+        {
+          
+        }
+      ],
+      "displayName" : "dvm05.camunda.loc-622498b16877",
+      "executors" : [
+        {
+          
+        }
+      ],
+      "icon" : "computer-x.png",
+      "iconClassName" : "icon-computer-x",
+      "idle" : true,
+      "jnlpAgent" : false,
+      "launchSupported" : true,
+      "loadStatistics" : {
+        
+      },
+      "manualLaunchAllowed" : true,
+      "monitorData" : {
+        "hudson.node_monitors.SwapSpaceMonitor" : {
+          "availablePhysicalMemory" : 10624950272,
+          "availableSwapSpace" : 4139597824,
+          "totalPhysicalMemory" : 25239080960,
+          "totalSwapSpace" : 4194299904
+        },
+        "hudson.node_monitors.ArchitectureMonitor" : "Linux (amd64)",
+        "hudson.node_monitors.ResponseTimeMonitor" : {
+          "average" : 112
+        },
+        "hudson.node_monitors.TemporarySpaceMonitor" : {
+          "path" : "/tmp",
+          "size" : 99973832704
+        },
+        "hudson.node_monitors.DiskSpaceMonitor" : {
+          "path" : "/home/camunda",
+          "size" : 99973832704
+        },
+        "hudson.node_monitors.ClockMonitor" : {
+          "diff" : 4637
+        }
+      },
+      "numExecutors" : 1,
+      "offline" : true,
+      "offlineCause" : {
+        
+      },
+      "offlineCauseReason" : "Shutting down Docker",
+      "oneOffExecutors" : [
+        
+      ],
+      "temporarilyOffline" : false
+    },
+    {
+      "actions" : [
+        {
+          
+        },
+        {
+          
+        }
+      ],
+      "displayName" : "dvm05.camunda.loc-c3f1afa71f3a",
+      "executors" : [
+        {
+          
+        }
+      ],
+      "icon" : "computer.png",
+      "iconClassName" : "icon-computer",
+      "idle" : false,
+      "jnlpAgent" : false,
+      "launchSupported" : true,
+      "loadStatistics" : {
+        
+      },
+      "manualLaunchAllowed" : true,
+      "monitorData" : {
+        "hudson.node_monitors.SwapSpaceMonitor" : {
+          "availablePhysicalMemory" : 10620125184,
+          "availableSwapSpace" : 4139597824,
+          "totalPhysicalMemory" : 25239080960,
+          "totalSwapSpace" : 4194299904
+        },
+        "hudson.node_monitors.ArchitectureMonitor" : "Linux (amd64)",
+        "hudson.node_monitors.ResponseTimeMonitor" : {
+          "average" : 333
+        },
+        "hudson.node_monitors.TemporarySpaceMonitor" : {
+          "path" : "/tmp",
+          "size" : 104656084992
+        },
+        "hudson.node_monitors.DiskSpaceMonitor" : {
+          "path" : "/home/camunda",
+          "size" : 104656084992
+        },
+        "hudson.node_monitors.ClockMonitor" : {
+          "diff" : 4639
+        }
+      },
+      "numExecutors" : 1,
+      "offline" : false,
+      "offlineCause" : null,
+      "offlineCauseReason" : "",
+      "oneOffExecutors" : [
+        
+      ],
+      "temporarilyOffline" : false
+    },
+    {
+      "actions" : [
+        {
+          
+        },
+        {
+          
+        }
+      ],
+      "displayName" : "kallisto.camunda.loc-0ac780245b39",
+      "executors" : [
+        {
+          
+        }
+      ],
+      "icon" : "computer.png",
+      "iconClassName" : "icon-computer",
+      "idle" : false,
+      "jnlpAgent" : false,
+      "launchSupported" : true,
+      "loadStatistics" : {
+        
+      },
+      "manualLaunchAllowed" : true,
+      "monitorData" : {
+        "hudson.node_monitors.SwapSpaceMonitor" : {
+          "availablePhysicalMemory" : 2335490048,
+          "availableSwapSpace" : 5481144320,
+          "totalPhysicalMemory" : 3220811776,
+          "totalSwapSpace" : 6442037248
+        },
+        "hudson.node_monitors.ArchitectureMonitor" : "Windows Server 2012 (amd64)",
+        "hudson.node_monitors.ResponseTimeMonitor" : {
+          "average" : 1160
+        },
+        "hudson.node_monitors.TemporarySpaceMonitor" : {
+          "path" : "C:\\Windows",
+          "size" : 5683056640
+        },
+        "hudson.node_monitors.DiskSpaceMonitor" : {
+          "path" : "C:\\jenkins",
+          "size" : 5683056640
+        },
+        "hudson.node_monitors.ClockMonitor" : {
+          "diff" : 7205769
+        }
+      },
+      "numExecutors" : 1,
+      "offline" : false,
+      "offlineCause" : null,
+      "offlineCauseReason" : "",
+      "oneOffExecutors" : [
+        
+      ],
+      "temporarilyOffline" : false
+    },
+    {
+      "actions" : [
+        {
+          
+        },
+        {
+          
+        }
+      ],
+      "displayName" : "kallisto.camunda.loc-b9604e3022a7",
+      "executors" : [
+        {
+          
+        }
+      ],
+      "icon" : "computer.png",
+      "iconClassName" : "icon-computer",
+      "idle" : false,
+      "jnlpAgent" : false,
+      "launchSupported" : true,
+      "loadStatistics" : {
+        
+      },
+      "manualLaunchAllowed" : true,
+      "monitorData" : {
+        "hudson.node_monitors.SwapSpaceMonitor" : {
+          "availablePhysicalMemory" : 2549219328,
+          "availableSwapSpace" : 5670690816,
+          "totalPhysicalMemory" : 3220811776,
+          "totalSwapSpace" : 6442037248
+        },
+        "hudson.node_monitors.ArchitectureMonitor" : "Windows Server 2012 (amd64)",
+        "hudson.node_monitors.ResponseTimeMonitor" : {
+          "average" : 4148
+        },
+        "hudson.node_monitors.TemporarySpaceMonitor" : {
+          "path" : "C:\\Windows",
+          "size" : 6298054656
+        },
+        "hudson.node_monitors.DiskSpaceMonitor" : {
+          "path" : "C:\\jenkins",
+          "size" : 6298513408
+        },
+        "hudson.node_monitors.ClockMonitor" : {
+          "diff" : 7202262
+        }
+      },
+      "numExecutors" : 1,
+      "offline" : false,
+      "offlineCause" : null,
+      "offlineCauseReason" : "",
+      "oneOffExecutors" : [
+        
+      ],
+      "temporarilyOffline" : false
+    }
+  ],
+  "displayName" : "nodes",
+  "totalExecutors" : 6
+}
