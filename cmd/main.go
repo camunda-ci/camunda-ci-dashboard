@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"net/http"
-	_ "net/http/pprof"
+	//_ "net/http/pprof"
 	"os"
 	"os/user"
 	"time"

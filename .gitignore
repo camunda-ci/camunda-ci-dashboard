@@ -8,3 +8,4 @@ dashboard-env.sh
 .camunda-ci-dashboard.json
 bin
 bindata_assetfs.go
+upx

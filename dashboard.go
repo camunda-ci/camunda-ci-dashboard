@@ -83,18 +83,26 @@ func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggreg
 	go func(instance *JenkinsInstance, aggregation *JenkinsAggregation) {
 		defer wg.Done()
 
-		queue, error := instance.Client.GetQueue()
-		if error != nil {
-
+		queue, err := instance.Client.GetQueue()
+		if err != nil {
+			aggregation.BuildQueueSize = 0
+			aggregation.Status = notAvailable
+			return
 		}
-		jenkinsAggregation.BuildQueueSize = len(queue.Items)
+		aggregation.BuildQueueSize = len(queue.Items)
 
 	}(instance, jenkinsAggregation)
 
 	go func(instance *JenkinsInstance, aggregation *JenkinsAggregation) {
 		defer wg.Done()
 
-		jenkinsAggregation.BusyExecutors, _ = instance.Client.GetBusyExecutors()
+		currentBusyExecutors, error := instance.Client.GetBusyExecutors()
+		if error != nil {
+			aggregation.BusyExecutors = 0
+			aggregation.Status = notAvailable
+			return
+		}
+		aggregation.BusyExecutors = currentBusyExecutors
 
 	}(instance, jenkinsAggregation)
 
@@ -102,7 +110,13 @@ func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggreg
 		defer wg.Done()
 
 		tree := "jobs[name,fullDisplayName,color,url,lastBuild[actions[foundFailureCauses[categories,description],failCount,skipCount,totalCount]]]"
-		jenkinsAggregation.Jobs, _ = instance.Client.GetJobsFromViewWithTree("Broken", tree)
+		jobs, error := instance.Client.GetJobsFromViewWithTree("Broken", tree)
+		if error != nil {
+			aggregation.Jobs = make([]Job, 0)
+			aggregation.Status = notAvailable
+			return
+		}
+		aggregation.Jobs = jobs
 
 	}(instance, jenkinsAggregation)
 

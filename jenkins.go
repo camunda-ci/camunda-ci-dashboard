@@ -11,7 +11,11 @@ import (
 )
 
 const (
-	jsonAPI = "/api/json"
+	jsonAPI       = "/api/json"
+	queue         = "queue" + jsonAPI
+	computer      = "computer" + jsonAPI
+	busyExecutors = "computer" + jsonAPI + "?tree=busyExecutors"
+	overallLoad   = "overallLoad" + jsonAPI
 )
 
 var (
@@ -287,7 +291,7 @@ func (o *OverallLoad) String() string {
 // GetQueue retrieves the Queue of the underlying Jenkins instance.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetQueue() (*Queue, error) {
-	response, _ := j.client.GetFrom("queue" + jsonAPI)
+	response, _ := j.client.GetFrom(queue)
 
 	queue := &Queue{}
 	if error := j.processQueueResponse(response, queue); error != nil {
@@ -334,14 +338,23 @@ func (j *JenkinsClient) processViewResponse(resp *http.Response, view *View) err
 // GetOverallLoad returns the OverallLoad of the underlying Jenkins instance.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetOverallLoad() (*OverallLoad, error) {
-	// TODO: implement
-	return &OverallLoad{}, nil
+	response, _ := j.client.GetFrom(overallLoad)
+
+	overallLoad := &OverallLoad{}
+	if error := j.processOverallLoadResponse(response, overallLoad); error != nil {
+		return nil, error
+	}
+	return overallLoad, nil
+}
+
+func (j *JenkinsClient) processOverallLoadResponse(resp *http.Response, overallLoad *OverallLoad) error {
+	return processResponse(resp, overallLoad, "OverallLoad")
 }
 
 // GetExecutors returns the currently configured Executors of the underlying Jenkins instance.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetExecutors() (*Executors, error) {
-	response, _ := j.client.GetFrom("computer" + jsonAPI)
+	response, _ := j.client.GetFrom(computer)
 
 	executors := &Executors{}
 	if error := j.processExecutorsResponse(response, executors); error != nil {
@@ -354,7 +367,7 @@ func (j *JenkinsClient) GetExecutors() (*Executors, error) {
 // GetBusyExecutors returns the number of currently occupied Executors of the underlying Jenkins instance.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetBusyExecutors() (int, error) {
-	response, _ := j.client.GetFrom("computer" + jsonAPI + "?tree=busyExecutors")
+	response, _ := j.client.GetFrom(busyExecutors)
 
 	executors := &Executors{}
 	if error := j.processExecutorsResponse(response, executors); error != nil {
@@ -393,10 +406,13 @@ func processResponse(resp *http.Response, v interface{}, component string) error
 
 		body, error := ioutil.ReadAll(resp.Body)
 		if error != nil {
-			return error
+			return fmt.Errorf("Unable to read response body: %s", error)
 		}
 
-		return json.Unmarshal(body, v)
+		error = json.Unmarshal(body, v)
+		if error != nil {
+			return fmt.Errorf("Error while unmarshalling body: %s", error)
+		}
 	}
 
 	return nil
