@@ -90,6 +90,9 @@ func createDashboardInstanceWithCustomJenkinsClient(jenkinsInstances []*JenkinsI
 	}
 }
 
+/**
+ * Test implementation of JenkinsClient
+ */
 type TestJenkinsClient struct {
 	Name      string
 	Url       string

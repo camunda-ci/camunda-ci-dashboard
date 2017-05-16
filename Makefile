@@ -27,11 +27,6 @@ ifneq ($(wildcard $(ENV_FILE)),)
 	RUN=. ./dashboard-env.sh && ./bin/$(BINARY)
 endif
 
-USE_UPX=false
-ifeq ($(shell uname), Linux)
-	USE_UPX=true
-endif
-
 .DEFAULT_GOAL: build
 
 build-offline: clean generate-assets lint test compile
@@ -46,9 +41,7 @@ compile:
 distribution:
 	rm bin/*
 	CGO_ENABLED=${DYNAMIC_COMPILE} GOOS=linux GOARCH=amd64 ${GO_BUILD_CMD} && chmod u+x bin/${BINARY} && mv bin/${BINARY} bin/${BINARY}_linux_amd64
-	@if [ "${USE_UPX}" == "true" ]; then \
-		upx/upx -f --brute bin/${BINARY}_linux_amd64; \
-	fi
+	upx/upx -f --brute bin/${BINARY}_linux_amd64
 
 docker-build: build distribution
 	docker build -t $(IMAGE_NAME) .
@@ -66,9 +59,7 @@ prerequisites:
 	go get -u github.com/kardianos/govendor
 	go get -u github.com/jteeuwen/go-bindata/...
 	go get github.com/elazarl/go-bindata-assetfs/...
-	@if [ "${USE_UPX}" == "true" ]; then \
-		curl -sSL https://github.com/upx/upx/releases/download/v3.94/upx-3.94-amd64_linux.tar.xz | tar -xvf - --strip=1 -C upx && chmod +x -R upx; \
-	fi
+	curl -sSL https://github.com/upx/upx/releases/download/v3.93/upx-3.93-amd64_linux.tar.xz | tar -J -xvf - --strip=1 -C upx && chmod +x -R upx
 
 clean:
 	rm -rf bin/ && mkdir -p bin
