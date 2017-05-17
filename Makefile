@@ -1,20 +1,26 @@
 #!/usr/bin/make
 
-SHELL := /bin/bash
-GO:=$(shell which go)
+BINARY=camunda-ci-dashboard
+IMAGE_NAME=registry.camunda.com/camunda-ci-dashboard:latest
+DYNAMIC_COMPILE=0
+
+SHELL:=/bin/bash
 SOURCE_DIR=.
 PROGRAM_DIR=./cmd
 ASSETS:=cmd/bindata_assetfs.go
-GO_PACKAGES = $(shell go list ./... | grep -v vendor)
-GO_FILES = $(shell find $(SOURCE_DIR) -name "*.go" | grep -v vendor | uniq)
-DYNAMIC_COMPILE=0
 
-BINARY=camunda-ci-dashboard
+# User-friendly check for go
+ifeq ($(shell which go >/dev/null 2>&1; echo $$?), 1)
+	GO_PACKAGES=$(shell go list $(SOURCE_DIR)/... | grep -v vendor)
+else
+	ECHO=$(shell echo "The 'go' command was not found.")
+endif
+
+GO_FILES=$(shell find $(SOURCE_DIR) -name "*.go" | grep -v vendor | uniq)
+
 
 LDFLAGS=-ldflags "-w -s -X github.com/camunda-ci/camunda-ci-dashboard/cmd/main.Build=`git rev-parse HEAD`"
 GO_BUILD_CMD=go build -installsuffix cgo ${LDFLAGS} -o bin/${BINARY} -v -x $(PROGRAM_DIR)
-
-IMAGE_NAME=registry.camunda.com/camunda-ci-dashboard:latest
 
 RUN=./bin/$(BINARY)
 ENV_FILE=dashboard-env.sh

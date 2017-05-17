@@ -12,11 +12,17 @@ Requirements:
 ```
 git clone https://github.com/camunda-ci/camunda-ci-dashboard
 cd camuda-ci-dashboard
-make distribution
+make docker-distro
 ```
 
 ## Usage
 
+Docker Image:
+```
+docker run -t -e CCD_USERNAME=foo -e CCD_PASSWORD=bar registry.camunda.com/camunda-ci-dashboard:latest
+```
+
+Binary:
 ```
 ./camunda-ci-dashboard [--debug=true] --username=foo --password=bar --bindAddress=0.0.0.0:8000
 ```
