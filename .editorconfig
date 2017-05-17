@@ -9,3 +9,7 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 [*.{html,js,css}]
 indent_style = space
+
+[Makefile]
+indent_style = tab
+indent_size = 4

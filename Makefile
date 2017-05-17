@@ -16,9 +16,6 @@ GO_BUILD_CMD=go build -installsuffix cgo ${LDFLAGS} -o bin/${BINARY} -v -x $(PRO
 
 IMAGE_NAME=registry.camunda.com/camunda-ci-dashboard:latest
 
-# https://github.com/upx/upx/releases/download/v3.93/upx-3.93-amd64_linux.tar.xz
-#
-
 RUN=./bin/$(BINARY)
 ENV_FILE=dashboard-env.sh
 
@@ -42,17 +39,6 @@ distribution:
 	rm bin/*
 	CGO_ENABLED=${DYNAMIC_COMPILE} GOOS=linux GOARCH=amd64 ${GO_BUILD_CMD} && chmod u+x bin/${BINARY} && mv bin/${BINARY} bin/${BINARY}_linux_amd64
 	upx/upx -f --brute bin/${BINARY}_linux_amd64
-
-docker-build: build distribution
-	docker build -t $(IMAGE_NAME) .
-
-docker-stage:
-	docker run -it --rm -p 8000:8000 $(IMAGE_NAME)
-
-docker-push:
-	docker push $(IMAGE_NAME)
-
-docker-publish: docker-build docker-push
 
 prerequisites:
 	go get -u github.com/golang/lint/golint
@@ -100,4 +86,18 @@ run-binary: build
 run-binary-debug: build-debug
 	$(RUN) --debug=true
 
-.PHONY: build build-debug clean compile deps distribution docker docker-stage docker-publish docker-push generate-assets generate-debug-assets lint prerequisites run run-binary run-binary-debug test test-compile vet
+# docker targets
+docker-distro: build distribution docker-package
+
+docker-package:
+	docker build -t $(IMAGE_NAME) .
+
+docker-push:
+	docker push $(IMAGE_NAME)
+
+docker-publish: docker-distro docker-push
+
+docker-stage:
+	docker run -it --rm -p 8000:8000 $(IMAGE_NAME)
+
+.PHONY: build build-debug clean compile deps distribution docker-distro docker-package docker-publish docker-push docker-stage generate-assets generate-debug-assets lint prerequisites run run-binary run-binary-debug test test-compile vet
