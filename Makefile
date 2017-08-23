@@ -98,12 +98,15 @@ docker-distro: build distribution docker-package
 docker-package:
 	docker build -t $(IMAGE_NAME) .
 
+docker-pull:
+	docker pull $(IMAGE_NAME)
+
 docker-push:
 	docker push $(IMAGE_NAME)
 
 docker-publish: docker-distro docker-push
 
-docker-stage:
+docker-run:
 	docker run -it --rm -p 8000:8000 $(IMAGE_NAME)
 
-.PHONY: build build-debug clean compile deps distribution docker-distro docker-package docker-publish docker-push docker-stage generate-assets generate-debug-assets lint prerequisites run run-binary run-binary-debug test test-compile vet
+.PHONY: build build-debug clean compile deps distribution docker-distro docker-package docker-publish docker-push docker-run generate-assets generate-debug-assets lint prerequisites run run-binary run-binary-debug test test-compile vet

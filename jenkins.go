@@ -291,7 +291,10 @@ func (o *OverallLoad) String() string {
 // GetQueue retrieves the Queue of the underlying Jenkins instance.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetQueue() (*Queue, error) {
-	response, _ := j.client.GetFrom(queue)
+	response, err := j.client.GetFrom(queue)
+	if err != nil {
+		return nil, err
+	}
 
 	queue := &Queue{}
 	if error := j.processQueueResponse(response, queue); error != nil {
@@ -308,7 +311,10 @@ func (j *JenkinsClient) processQueueResponse(resp *http.Response, queue *Queue) 
 // GetJobsFromView returns a slice with all Jobs from a given View name from the underlying Jenkins instance.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetJobsFromView(viewName string) ([]Job, error) {
-	response, _ := j.client.GetFrom("view/" + viewName + jsonAPI)
+	response, err := j.client.GetFrom("view/" + viewName + jsonAPI)
+	if err != nil {
+		return nil, err
+	}
 
 	view := &View{}
 	if error := j.processViewResponse(response, view); error != nil {
@@ -321,7 +327,10 @@ func (j *JenkinsClient) GetJobsFromView(viewName string) ([]Job, error) {
 // GetJobsFromViewWithTree returns a slice with all Jobs from a given View name, restricting the returned attributes by the given tree string.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetJobsFromViewWithTree(viewName string, tree string) ([]Job, error) {
-	response, _ := j.client.GetFrom("view/" + viewName + jsonAPI + "?tree=" + tree)
+	response, err := j.client.GetFrom("view/" + viewName + jsonAPI + "?tree=" + tree)
+	if err != nil {
+		return nil, err
+	}
 
 	view := &View{}
 	if error := j.processViewResponse(response, view); error != nil {
@@ -338,7 +347,10 @@ func (j *JenkinsClient) processViewResponse(resp *http.Response, view *View) err
 // GetOverallLoad returns the OverallLoad of the underlying Jenkins instance.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetOverallLoad() (*OverallLoad, error) {
-	response, _ := j.client.GetFrom(overallLoad)
+	response, err := j.client.GetFrom(overallLoad)
+	if err != nil {
+		return nil, err
+	}
 
 	overallLoad := &OverallLoad{}
 	if error := j.processOverallLoadResponse(response, overallLoad); error != nil {
@@ -354,7 +366,10 @@ func (j *JenkinsClient) processOverallLoadResponse(resp *http.Response, overallL
 // GetExecutors returns the currently configured Executors of the underlying Jenkins instance.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetExecutors() (*Executors, error) {
-	response, _ := j.client.GetFrom(computer)
+	response, err := j.client.GetFrom(computer)
+	if err != nil {
+		return nil, err
+	}
 
 	executors := &Executors{}
 	if error := j.processExecutorsResponse(response, executors); error != nil {
@@ -367,7 +382,10 @@ func (j *JenkinsClient) GetExecutors() (*Executors, error) {
 // GetBusyExecutors returns the number of currently occupied Executors of the underlying Jenkins instance.
 // It will return an error, if the connection or the JSON un-marshalling breaks.
 func (j *JenkinsClient) GetBusyExecutors() (int, error) {
-	response, _ := j.client.GetFrom(busyExecutors)
+	response, err := j.client.GetFrom(busyExecutors)
+	if err != nil {
+		return -1, err
+	}
 
 	executors := &Executors{}
 	if error := j.processExecutorsResponse(response, executors); error != nil {

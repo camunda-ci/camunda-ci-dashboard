@@ -73,8 +73,9 @@ func (d *Dashboard) GetBrokenJenkinsBuilds() []*JenkinsAggregation {
 
 func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggregation {
 	jenkinsAggregation := &JenkinsAggregation{
-		Name: instance.Name,
-		Url:  instance.Url,
+		Name:   instance.Name,
+		Url:    instance.Url,
+		Status: "ok",
 	}
 
 	var wg sync.WaitGroup

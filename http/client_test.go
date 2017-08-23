@@ -16,6 +16,22 @@ const (
 
 	fixtureBaseURL   = "https://github.com/camunda"
 	fixtureBasicJSON = "{ \"id\": 1 }"
+
+	fixtureHtmlErrorPage = `
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Error</title>
+	</head>
+	<body>
+		<h1>An error occurred.</h1>
+		<p>Sorry, the page you are looking for is currently unavailable.<br/>
+		Please try again later.</p>
+		<p>If you are the system administrator of this resource then you should check
+		the <a href="http://nginx.org/r/error_log">error log</a> for details.</p>
+		<p><em>Faithfully yours, nginx.</em></p>
+	</body>
+</html>`
 )
 
 func TestDefaultHttpConfig(t *testing.T) {
@@ -87,7 +103,7 @@ func TestHttpClient_GetFrom(t *testing.T) {
 }
 
 func TestHttpClient_PostTo(t *testing.T) {
-	server := mockEchoServer(200)
+	server := mockEchoServer(http.StatusOK)
 	defer server.Close()
 
 	client := createTestHTTPClient(server.URL)
@@ -98,7 +114,7 @@ func TestHttpClient_PostTo(t *testing.T) {
 }
 
 func TestHttpClient_PutTo(t *testing.T) {
-	server := mockEchoServer(200)
+	server := mockEchoServer(http.StatusOK)
 	defer server.Close()
 
 	client := createTestHTTPClient(server.URL)
@@ -110,7 +126,7 @@ func TestHttpClient_PutTo(t *testing.T) {
 
 func TestHttpClient_DeleteFrom(t *testing.T) {
 	f := func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(200)
+		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", contentTypeJSON)
 	}
 	server := mockServerWith(http.HandlerFunc(f))
@@ -140,6 +156,17 @@ func TestHttpClient_PutRequest(t *testing.T) {
 
 func TestHttpClient_DeleteRequest(t *testing.T) {
 
+}
+
+func TestHttpClient_StatusCodeErrorHandling(t *testing.T) {
+	server := mockServer(http.StatusServiceUnavailable, contentTypeJSON, fixtureHtmlErrorPage)
+	defer server.Close()
+
+	client := createTestHTTPClient(server.URL)
+	resp, _ := client.GetFrom("503please")
+
+	assertResponseHasStatus(resp, http.StatusServiceUnavailable, t)
+	assertResponseBodyIs(resp, fixtureHtmlErrorPage, t)
 }
 
 func mockEchoServer(statusCode int) *httptest.Server {
@@ -173,7 +200,7 @@ func mockServer(statusCode int, contentType string, body string) *httptest.Serve
 func mockServerWith(handlerFunc http.HandlerFunc) *httptest.Server {
 	if handlerFunc == nil {
 		handlerFunc = func(w http.ResponseWriter, r *http.Request) {
-			w.WriteHeader(200)
+			w.WriteHeader(http.StatusOK)
 			w.Header().Set("Content-Type", contentTypeJSON)
 			fmt.Fprint(w, "{}")
 		}

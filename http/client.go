@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"strings"
@@ -46,6 +46,15 @@ type HTTPConfig struct {
 type HTTPClient struct {
 	client *http.Client
 	config *HTTPConfig
+}
+
+type HttpError struct {
+	Message    string
+	StatusCode int
+}
+
+func (e HttpError) Error() string {
+	return fmt.Sprintf("Error %s with statuscode %d", e.Message, e.StatusCode)
 }
 
 type NotFoundError struct {
@@ -248,25 +257,36 @@ func (h *HTTPClient) executeRequest(r *http.Request) (*http.Response, error) {
 		r = r.WithContext(context)
 	}
 
-	resp, error := h.client.Do(r)
-
-	if error != nil {
-		return handleError(resp, error)
+	var resp *http.Response
+	var err error
+	if resp, err = h.client.Do(r); err != nil {
+		return nil, err
+	}
+	if err = handleHttpStatusCodeErrors(resp); err != nil {
+		return nil, err
 	}
 
 	return resp, nil
 }
 
-func handleError(resp *http.Response, error error) (*http.Response, error) {
-	log.Fatal(error)
+func handleHttpStatusCodeErrors(resp *http.Response) error {
+	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusBadRequest {
+		if resp.StatusCode == http.StatusUnauthorized {
+			return &UnauthorizedError{Message: "Authentication required.", Url: resp.Request.URL.String()}
+		}
 
-	if resp.StatusCode == http.StatusUnauthorized {
-		return resp, &UnauthorizedError{Message: "Authentication required.", Url: resp.Request.URL.String()}
+		if resp.StatusCode == http.StatusNotFound {
+			return &NotFoundError{Message: "Resource not found.", Url: resp.Request.URL.String()}
+		}
+
+		if resp.Body != nil {
+			defer resp.Body.Close()
+			body, _ := ioutil.ReadAll(resp.Body)
+			return &HttpError{Message: string(body), StatusCode: resp.StatusCode}
+		}
+
+		return &RemoteError{resp.Request.URL.Host, fmt.Errorf("%d: (%s)", resp.StatusCode, resp.Request.URL.String())}
 	}
 
-	if resp.StatusCode == http.StatusNotFound {
-		return resp, &NotFoundError{Message: "Resource not found.", Url: resp.Request.URL.String()}
-	}
-
-	return resp, &RemoteError{resp.Request.URL.Host, fmt.Errorf("%d: (%s)", resp.StatusCode, resp.Request.URL.String())}
+	return nil
 }

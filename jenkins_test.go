@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	client "github.com/camunda-ci/camunda-ci-dashboard/http"
 )
 
 func TestJenkinsClient_GetQueue_Request(t *testing.T) {
@@ -56,6 +58,17 @@ func TestJenkinsClient_GetJobsFromView_Response(t *testing.T) {
 	assertNoError(err, t, "view 'broken'")
 
 	assertSizeOf(jobs, 2, t)
+}
+
+func TestJenkinsClient_GetJobsFromNonExistingView(t *testing.T) {
+	server := mockFailureResponseWithBodyFromFile(http.StatusInternalServerError, "text/html", "testdata/view_does_not_exist.html", t)
+	defer server.Close()
+
+	jobs, err := createTestJenkinsClient(server).
+		GetJobsFromView("broken")
+	assertHttpStatusError(err, http.StatusInternalServerError, t)
+
+	assertSizeOf(jobs, 0, t)
 }
 
 func TestJenkinsClient_GetJobsFromViewWithTree_Request(t *testing.T) {
@@ -176,17 +189,27 @@ type testRequestFunction func(r *http.Request)
 
 // mock server and allow to test the receiving request
 func mockServerForRequestTest(testRequest testRequestFunction) *httptest.Server {
-	return mockServer(200, "application/json", "", testRequest)
+	return mockServer(http.StatusOK, "application/json", "", testRequest)
 }
 
-// mock server and return response with body specified by fileName
+// mock server and return successful response with body specified by fileName
 func mockSuccesfulResponseWithBodyFromFile(fileName string, t *testing.T) *httptest.Server {
 	content, err := ioutil.ReadFile(fileName)
 	if err != nil {
 		t.Fatalf("Unable to read file: %s. Error: %s", fileName, err)
 	}
 
-	return mockServer(200, "application/json", string(content), nil)
+	return mockServer(http.StatusOK, "application/json", string(content), nil)
+}
+
+// mock server and return failure response with body specified by fileName
+func mockFailureResponseWithBodyFromFile(statusCode int, contentType string, fileName string, t *testing.T) *httptest.Server {
+	content, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		t.Fatalf("Unable to read file: %s. Error: %s", fileName, err)
+	}
+
+	return mockServer(statusCode, contentType, string(content), nil)
 }
 
 func mockServer(statusCode int, contentType string, body string, testRequest testRequestFunction) *httptest.Server {
@@ -218,6 +241,16 @@ func assertPathIs(req *http.Request, expectedPath string, t *testing.T) {
 func assertNoError(err error, t *testing.T, msg string) {
 	if err != nil {
 		t.Errorf("Error while retrieving %s. %s", msg, err)
+	}
+}
+
+func assertHttpStatusError(err error, expectedStatusCode int, t *testing.T) {
+	if err != nil {
+		if tmp, ok := err.(*client.HttpError); ok {
+			if tmp.StatusCode != expectedStatusCode {
+				t.Errorf("Expected status code does not match. Expected %d, got %d", expectedStatusCode, tmp.StatusCode)
+			}
+		}
 	}
 }
 
