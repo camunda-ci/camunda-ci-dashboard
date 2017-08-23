@@ -1,6 +1,7 @@
 FROM golang:alpine
 
 COPY bin/camunda-ci-dashboard_linux_amd64 /bin/camunda-ci-dashboard
+RUN chmod +x /bin/camunda-ci-dashboard
 
 ENTRYPOINT ["/bin/camunda-ci-dashboard"]
 
