@@ -17,7 +17,7 @@ const (
 	fixtureBaseURL   = "https://github.com/camunda"
 	fixtureBasicJSON = "{ \"id\": 1 }"
 
-	fixtureHtmlErrorPage = `
+	fixtureHTMLErrorPage = `
 <!DOCTYPE html>
 <html>
 	<head>
@@ -159,14 +159,14 @@ func TestHttpClient_DeleteRequest(t *testing.T) {
 }
 
 func TestHttpClient_StatusCodeErrorHandling(t *testing.T) {
-	server := mockServer(http.StatusServiceUnavailable, contentTypeJSON, fixtureHtmlErrorPage)
+	server := mockServer(http.StatusServiceUnavailable, contentTypeJSON, fixtureHTMLErrorPage)
 	defer server.Close()
 
 	client := createTestHTTPClient(server.URL)
 	resp, _ := client.GetFrom("503please")
 
 	assertResponseHasStatus(resp, http.StatusServiceUnavailable, t)
-	assertResponseBodyIs(resp, fixtureHtmlErrorPage, t)
+	assertResponseBodyIs(resp, fixtureHTMLErrorPage, t)
 }
 
 func mockEchoServer(statusCode int) *httptest.Server {

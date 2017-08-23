@@ -100,21 +100,7 @@ func readConfig() {
 	//	fmt.Println("Config file changed:", e.Name)
 	//})
 
-	jenkinsInstances := []*dashboard.JenkinsInstance{}
-
-	jenkins := viper.Get("jenkins")
-	if jenkins != nil {
-		jenkinsMap := jenkins.(map[string]interface{})
-
-		for k, v := range jenkinsMap {
-			jenkinsInstance := new(dashboard.JenkinsInstance)
-			jenkinsInstance.Name = k
-			url := v.(map[string]interface{})["url"].(string)
-			jenkinsInstance.Url = url
-
-			jenkinsInstances = append(jenkinsInstances, jenkinsInstance)
-		}
-	}
+	jenkinsInstances := parseJenkinsInstanceConfig()
 
 	config = &Config{
 		Debug:       viper.GetBool("debug"),
@@ -130,6 +116,30 @@ func readConfig() {
 	}
 
 	dashboard.Debug = config.Debug
+}
+func parseJenkinsInstanceConfig() []*dashboard.JenkinsInstance {
+	jenkinsInstances := []*dashboard.JenkinsInstance{}
+
+	jenkins := viper.Get("jenkins")
+	if jenkins != nil {
+		jenkinsMap := jenkins.(map[string]interface{})
+
+		for k, v := range jenkinsMap {
+			jenkinsInstance := new(dashboard.JenkinsInstance)
+			jenkinsInstance.Name = k
+
+			url := v.(map[string]interface{})["url"].(string)
+			jenkinsInstance.Url = url
+
+			if brokenJobsUrl, ok := v.(map[string]interface{})["brokenjobsurl"]; ok {
+				jenkinsInstance.BrokenJobsUrl = brokenJobsUrl.(string)
+			}
+
+			jenkinsInstances = append(jenkinsInstances, jenkinsInstance)
+		}
+	}
+
+	return jenkinsInstances
 }
 
 func main() {

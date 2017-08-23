@@ -5,6 +5,10 @@ import (
 	"testing"
 )
 
+const (
+	fixtureJenkinsUrl = "http://ci.jenkins.io"
+)
+
 func TestDashboard_GetBrokenJenkinsBuilds_Happy(t *testing.T) {
 	instance := createDashboardInstanceWithSingleJenkinsInstance()
 
@@ -14,14 +18,14 @@ func TestDashboard_GetBrokenJenkinsBuilds_Happy(t *testing.T) {
 	}
 	for _, brokenJenkinsBuild := range brokenJenkinsBuilds {
 		t.Logf("%+v", *brokenJenkinsBuild)
-		if brokenJenkinsBuild.Url != "ci.jenkins.io" {
+		if brokenJenkinsBuild.Url != fixtureJenkinsUrl {
 			t.FailNow()
 		}
 	}
 }
 
 func TestDashboard_GetBrokenJenkinsBuilds_JenkinsClientReturnsError(t *testing.T) {
-	jenkinsInstance := &JenkinsInstance{Name: "Jenkins Public", Url: "ci.jenkins.io"}
+	jenkinsInstance := &JenkinsInstance{Name: "Jenkins Public", Url: fixtureJenkinsUrl}
 	client := &TestJenkinsClient{
 		Name:  jenkinsInstance.Name,
 		Url:   jenkinsInstance.Url,
@@ -36,13 +40,13 @@ func TestDashboard_GetBrokenJenkinsBuilds_JenkinsClientReturnsError(t *testing.T
 	if len(brokenJenkinsBuilds) != 1 {
 		t.Fatalf("Wrong number of jenkins aggregations returned. Expected 1, but got %d", len(brokenJenkinsBuilds))
 	}
-	if brokenJenkinsBuilds[0].Status != notAvailable {
+	if brokenJenkinsBuilds[0].Status != failed {
 		t.Fatal("Status should be set to 'not available' in case of errors.")
 	}
 
 	for _, brokenJenkinsBuild := range brokenJenkinsBuilds {
 		t.Logf("%+v", *brokenJenkinsBuild)
-		if brokenJenkinsBuild.Url != "ci.jenkins.io" {
+		if brokenJenkinsBuild.Url != fixtureJenkinsUrl {
 			t.FailNow()
 		}
 	}
@@ -53,7 +57,7 @@ func TestDashboard_GetBrokenJenkinsBuilds_JenkinsClientReturnsError(t *testing.T
  */
 func createDashboardInstanceWithSingleJenkinsInstance() *Dashboard {
 	jenkinsInstances := []*JenkinsInstance{
-		{Name: "Jenkins Public", Url: "ci.jenkins.io"},
+		{Name: "Jenkins Public", Url: fixtureJenkinsUrl, BrokenJobsUrl: fixtureJenkinsUrl},
 	}
 
 	return createDashboardInstanceWithMocks(jenkinsInstances, true, nil)
@@ -122,6 +126,20 @@ func (t *TestJenkinsClient) GetJobsFromView(viewName string) ([]Job, error) {
 }
 
 func (t *TestJenkinsClient) GetJobsFromViewWithTree(viewName string, tree string) ([]Job, error) {
+	if t.error != nil {
+		return nil, t.error
+	}
+	return t.jobs, nil
+}
+
+func (t *TestJenkinsClient) GetJobsFromViewByPath(path string) ([]Job, error) {
+	if t.error != nil {
+		return nil, t.error
+	}
+	return t.jobs, nil
+}
+
+func (t *TestJenkinsClient) GetJobsFromViewWithTreeByPath(path string, tree string) ([]Job, error) {
 	if t.error != nil {
 		return nil, t.error
 	}

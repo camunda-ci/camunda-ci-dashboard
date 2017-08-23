@@ -1,12 +1,15 @@
 package dashboard
 
 import (
+	"fmt"
+	"log"
+	"strings"
 	"sync"
 )
 
 const (
-	notAvailable Status = "n/a"
-	ok           Status = "ok"
+	failed Status = false
+	ok     Status = true
 )
 
 // Dashboard is a container for all configured JenkinsInstance's.
@@ -16,9 +19,10 @@ type Dashboard struct {
 
 // JenkinsInstance holds basic informations about a Jenkins instance and the client connected to it.
 type JenkinsInstance struct {
-	Name   string
-	Url    string
-	Client Jenkins
+	Name          string
+	Url           string
+	BrokenJobsUrl string
+	Client        Jenkins
 }
 
 // JenkinsAggregations is a container for all retrieved JenkinsAggregation
@@ -28,12 +32,13 @@ type JenkinsAggregations struct {
 
 // Status describes the current state of the Jenkins instance.
 // Either 'ok', when the client was able to connect to it, or 'not available', when the connection was unsuccessful.
-type Status string
+type Status bool
 
 // JenkinsAggregation holds all dashboard relevant informations for a Jenkins instance
 type JenkinsAggregation struct {
 	Name           string `json:"name"`
 	Url            string `json:"url"`
+	BrokenJobsUrl  string `json:"brokenJobsUrl"`
 	Status         Status `json:"status"`
 	BusyExecutors  int    `json:"busyExecutors"`
 	BuildQueueSize int    `json:"buildQueueSize"`
@@ -72,10 +77,15 @@ func (d *Dashboard) GetBrokenJenkinsBuilds() []*JenkinsAggregation {
 }
 
 func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggregation {
+	if instance.BrokenJobsUrl == "" {
+		instance.BrokenJobsUrl = instance.Url
+	}
+
 	jenkinsAggregation := &JenkinsAggregation{
-		Name:   instance.Name,
-		Url:    instance.Url,
-		Status: "ok",
+		Name:          instance.Name,
+		Url:           instance.Url,
+		Status:        ok,
+		BrokenJobsUrl: instance.BrokenJobsUrl,
 	}
 
 	var wg sync.WaitGroup
@@ -86,8 +96,9 @@ func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggreg
 
 		queue, err := instance.Client.GetQueue()
 		if err != nil {
+			log.Printf("[WARN] %s", err)
 			aggregation.BuildQueueSize = 0
-			aggregation.Status = notAvailable
+			aggregation.Status = failed
 			return
 		}
 		aggregation.BuildQueueSize = len(queue.Items)
@@ -97,10 +108,11 @@ func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggreg
 	go func(instance *JenkinsInstance, aggregation *JenkinsAggregation) {
 		defer wg.Done()
 
-		currentBusyExecutors, error := instance.Client.GetBusyExecutors()
-		if error != nil {
+		currentBusyExecutors, err := instance.Client.GetBusyExecutors()
+		if err != nil {
+			log.Printf("[WARN] %s", err)
 			aggregation.BusyExecutors = 0
-			aggregation.Status = notAvailable
+			aggregation.Status = failed
 			return
 		}
 		aggregation.BusyExecutors = currentBusyExecutors
@@ -111,10 +123,13 @@ func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggreg
 		defer wg.Done()
 
 		tree := "jobs[name,fullDisplayName,color,url,lastBuild[actions[foundFailureCauses[categories,description],failCount,skipCount,totalCount]]]"
-		jobs, error := instance.Client.GetJobsFromViewWithTree("Broken", tree)
-		if error != nil {
+
+		path := getBrokenJobsPath(instance)
+		jobs, err := instance.Client.GetJobsFromViewWithTreeByPath(path+"/view/Broken", tree)
+		if err != nil {
+			log.Printf("[WARN] %s", err)
 			aggregation.Jobs = make([]Job, 0)
-			aggregation.Status = notAvailable
+			aggregation.Status = failed
 			return
 		}
 		aggregation.Jobs = jobs
@@ -124,4 +139,12 @@ func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggreg
 	wg.Wait()
 
 	return jenkinsAggregation
+}
+
+func getBrokenJobsPath(instance *JenkinsInstance) string {
+	if strings.HasPrefix(instance.BrokenJobsUrl, instance.Url) {
+		return strings.TrimPrefix(instance.BrokenJobsUrl, instance.Url)
+	}
+
+	panic(fmt.Sprintf("Instance URL '%s' must be part of broken jobs URL '%s'.", instance.Url, instance.BrokenJobsUrl))
 }

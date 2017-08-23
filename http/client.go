@@ -173,36 +173,36 @@ func (h *HTTPClient) DeleteFrom(path string) (*http.Response, error) {
 }
 
 func (h *HTTPClient) GetFromWithContext(ctx context.Context, path string) (*http.Response, error) {
-	request, error := createRequest(ctx, h.config.baseURL, path, http.MethodGet, nil, h.config.username, h.config.password)
-	if error != nil {
-		return nil, error
+	request, err := createRequest(ctx, h.config.baseURL, path, http.MethodGet, nil, h.config.username, h.config.password)
+	if err != nil {
+		return nil, err
 	}
 	requestWithCtx := request.WithContext(ctx)
 	return h.executeRequest(requestWithCtx)
 }
 
 func (h *HTTPClient) PostToWithContext(ctx context.Context, path string, body io.Reader) (*http.Response, error) {
-	request, error := createRequest(ctx, h.config.baseURL, path, http.MethodPost, body, h.config.username, h.config.password)
-	if error != nil {
-		return nil, error
+	request, err := createRequest(ctx, h.config.baseURL, path, http.MethodPost, body, h.config.username, h.config.password)
+	if err != nil {
+		return nil, err
 	}
 	requestWithCtx := request.WithContext(ctx)
 	return h.executeRequest(requestWithCtx)
 }
 
 func (h *HTTPClient) PutToWithContext(ctx context.Context, path string, body io.Reader) (*http.Response, error) {
-	request, error := createRequest(ctx, h.config.baseURL, path, http.MethodPut, body, h.config.username, h.config.password)
-	if error != nil {
-		return nil, error
+	request, err := createRequest(ctx, h.config.baseURL, path, http.MethodPut, body, h.config.username, h.config.password)
+	if err != nil {
+		return nil, err
 	}
 	requestWithCtx := request.WithContext(ctx)
 	return h.executeRequest(requestWithCtx)
 }
 
 func (h *HTTPClient) DeleteFromWithContext(ctx context.Context, path string) (*http.Response, error) {
-	request, error := createRequest(ctx, h.config.baseURL, path, http.MethodDelete, nil, h.config.username, h.config.password)
-	if error != nil {
-		return nil, error
+	request, err := createRequest(ctx, h.config.baseURL, path, http.MethodDelete, nil, h.config.username, h.config.password)
+	if err != nil {
+		return nil, err
 	}
 	requestWithCtx := request.WithContext(ctx)
 	return h.executeRequest(requestWithCtx)
@@ -234,6 +234,7 @@ func createDefaultContext(ctx context.Context) (context.Context, context.CancelF
 func createRequest(ctx context.Context, baseURL string, endpoint string, method string, body io.Reader, username string, password string) (*http.Request, error) {
 	// construct url by appending endpoint to base url
 	baseURL = strings.TrimSuffix(baseURL, "/")
+	endpoint = strings.TrimPrefix(endpoint, "/")
 
 	request, err := http.NewRequest(method, baseURL+"/"+endpoint, body)
 	if err != nil {
@@ -262,14 +263,14 @@ func (h *HTTPClient) executeRequest(r *http.Request) (*http.Response, error) {
 	if resp, err = h.client.Do(r); err != nil {
 		return nil, err
 	}
-	if err = handleHttpStatusCodeErrors(resp); err != nil {
+	if err = handleHTTPStatusCodeErrors(resp); err != nil {
 		return nil, err
 	}
 
 	return resp, nil
 }
 
-func handleHttpStatusCodeErrors(resp *http.Response) error {
+func handleHTTPStatusCodeErrors(resp *http.Response) error {
 	if resp.StatusCode < http.StatusOK || resp.StatusCode >= http.StatusBadRequest {
 		if resp.StatusCode == http.StatusUnauthorized {
 			return &UnauthorizedError{Message: "Authentication required.", Url: resp.Request.URL.String()}

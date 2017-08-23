@@ -35,13 +35,14 @@
         <div class="card">
           <div class="card-content">
             <span class="card-title grey-text">
-              <a href="{{jenkins.url}}/view/Broken/" target="_blank" class="blue-grey-text">{{jenkins.name}}</a>
-              {{#if jenkins.error}}
+              <a href="{{jenkins.brokenJobsUrl}}/view/Broken/" target="_blank" class="blue-grey-text">{{jenkins.name}}</a>
+              {{#unless jenkins.status}}
               <span class="new badge" data-badge-caption="">
               <i class="material-icons red-text small" title="Unable to connect">report_problem</i>
                 Not available
               </span>
-              {{else}}
+              {{/unless}}
+              {{#if jenkins.status}}
               <span class="new badge blue-grey lighten-2" data-badge-caption="Broken">
               {{jenkins.jobs.length}}
               </span>

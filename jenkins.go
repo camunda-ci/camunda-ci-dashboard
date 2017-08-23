@@ -28,6 +28,8 @@ type Jenkins interface {
 	GetQueue() (*Queue, error)
 	GetJobsFromView(viewName string) ([]Job, error)
 	GetJobsFromViewWithTree(viewName string, tree string) ([]Job, error)
+	GetJobsFromViewByPath(path string) ([]Job, error)
+	GetJobsFromViewWithTreeByPath(path string, tree string) ([]Job, error)
 	GetOverallLoad() (*OverallLoad, error)
 	GetExecutors() (*Executors, error)
 	GetBusyExecutors() (int, error)
@@ -340,6 +342,38 @@ func (j *JenkinsClient) GetJobsFromViewWithTree(viewName string, tree string) ([
 	return view.Jobs, nil
 }
 
+// GetJobsFromViewByPath returns a slice with all Jobs from a given View name from the underlying Jenkins instance.
+// It will return an error, if the connection or the JSON un-marshalling breaks.
+func (j *JenkinsClient) GetJobsFromViewByPath(path string) ([]Job, error) {
+	response, err := j.client.GetFrom(path + jsonAPI)
+	if err != nil {
+		return nil, err
+	}
+
+	view := &View{}
+	if error := j.processViewResponse(response, view); error != nil {
+		return nil, error
+	}
+
+	return view.Jobs, nil
+}
+
+// GetJobsFromViewWithTreeByPath returns a slice with all Jobs from a given View name, restricting the returned attributes by the given tree string.
+// It will return an error, if the connection or the JSON un-marshalling breaks.
+func (j *JenkinsClient) GetJobsFromViewWithTreeByPath(path string, tree string) ([]Job, error) {
+	response, err := j.client.GetFrom(path + jsonAPI + "?tree=" + tree)
+	if err != nil {
+		return nil, err
+	}
+
+	view := &View{}
+	if error := j.processViewResponse(response, view); error != nil {
+		return nil, error
+	}
+
+	return view.Jobs, nil
+}
+
 func (j *JenkinsClient) processViewResponse(resp *http.Response, view *View) error {
 	return processResponse(resp, view, "View")
 }
@@ -411,12 +445,7 @@ func NewJenkinsClient(url string, username string, password string) Jenkins {
 // Throws either an error if the resp.Body couldn't be read or the un-marshalling failed.
 func processResponse(resp *http.Response, v interface{}, component string) error {
 	if Debug {
-		dumpResponse, error := httputil.DumpResponse(resp, true)
-		if error != nil {
-			log.Printf("[DEBUG] %s: %s", component, error)
-		}
-		log.Printf("[DEBUG][REQ]: %s: %s", component, resp.Request.URL)
-		log.Printf("[DEBUG][RESP]: %s: %s", component, string(dumpResponse))
+		debugResponse(resp, component)
 	}
 
 	if resp.Body != nil {
@@ -434,4 +463,13 @@ func processResponse(resp *http.Response, v interface{}, component string) error
 	}
 
 	return nil
+}
+
+func debugResponse(resp *http.Response, component string) {
+	dumpResponse, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		log.Printf("[DEBUG] %s: %s", component, err)
+	}
+	log.Printf("[DEBUG][REQ]: %s: %s", component, resp.Request.URL)
+	log.Printf("[DEBUG][RESP]: %s: %s", component, string(dumpResponse))
 }
