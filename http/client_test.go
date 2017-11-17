@@ -163,10 +163,18 @@ func TestHttpClient_StatusCodeErrorHandling(t *testing.T) {
 	defer server.Close()
 
 	client := createTestHTTPClient(server.URL)
-	resp, _ := client.GetFrom("503please")
+	resp, err := client.GetFrom("503please")
 
-	assertResponseHasStatus(resp, http.StatusServiceUnavailable, t)
-	assertResponseBodyIs(resp, fixtureHTMLErrorPage, t)
+	if resp != nil {
+		t.Errorf("Expected response to be nil, got %v.", resp)
+	}
+	if ue, ok := err.(*HttpError); !ok {
+		t.Errorf("Expected HttpError, got %v.", ue)
+	} else {
+		if ue.StatusCode != 503 {
+			t.Errorf("Expected StatusCode 503, got %d.", ue.StatusCode)
+		}
+	}
 }
 
 func mockEchoServer(statusCode int) *httptest.Server {
