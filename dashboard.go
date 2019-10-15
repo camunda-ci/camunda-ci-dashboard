@@ -15,38 +15,23 @@ const (
 // Dashboard is a container for all configured JenkinsInstance's.
 type Dashboard struct {
 	jenkinsInstances []*JenkinsInstance
+	travisInstances  []*TravisInstance
 }
 
-// JenkinsInstance holds basic informations about a Jenkins instance and the client connected to it.
-type JenkinsInstance struct {
-	Name          string
-	Url           string
-	BrokenJobsUrl string
-	Client        Jenkins
-}
-
-// JenkinsAggregations is a container for all retrieved JenkinsAggregation
-type JenkinsAggregations struct {
-	jenkinsAggregation []JenkinsAggregation
-}
-
-// Status describes the current state of the Jenkins instance.
-// Either 'ok', when the client was able to connect to it, or 'not available', when the connection was unsuccessful.
+// status describes the current state of the instance.
+// 'ok', when the client was able to connect to it, or 'not available', when the connection was unsuccessful.
 type Status bool
 
-// JenkinsAggregation holds all dashboard relevant informations for a Jenkins instance
-type JenkinsAggregation struct {
-	Name           string `json:"name"`
-	Url            string `json:"url"`
-	BrokenJobsUrl  string `json:"brokenJobsUrl"`
-	Status         Status `json:"status"`
-	BusyExecutors  int    `json:"busyExecutors"`
-	BuildQueueSize int    `json:"buildQueueSize"`
-	Jobs           []Job  `json:"jobs"`
+type Aggregation struct {
+	Name   string `json:"name"`
+	Url    string `json:"url"`
+	Type   string `json:"type"`
+	Status Status `json:"status"`
 }
 
 // Init initializes the Dashboard with the given JenkinsInstance's and how to access them.
-func Init(jenkinsInstances []*JenkinsInstance, jenkinsUsername string, jenkinsPassword string) *Dashboard {
+func Init(jenkinsInstances []*JenkinsInstance, travisInstances []*TravisInstance,
+	jenkinsUsername string, jenkinsPassword string) *Dashboard {
 	// initialize Jenkins clients
 	for _, jenkinsInstance := range jenkinsInstances {
 		jenkinsInstance.Client = NewJenkinsClient(jenkinsInstance.Url, jenkinsUsername, jenkinsPassword)
@@ -54,15 +39,71 @@ func Init(jenkinsInstances []*JenkinsInstance, jenkinsUsername string, jenkinsPa
 
 	return &Dashboard{
 		jenkinsInstances: jenkinsInstances,
+		travisInstances:  travisInstances,
 	}
+}
+
+func getBrokenBuildsForTravisInstance(instance *TravisInstance) *TravisAggregation {
+	count := len(instance.Repos)
+	aggregation := &TravisAggregation{
+		Aggregation: Aggregation{
+			Type:   "travis",
+			Name:   instance.Name,
+			Url:    instance.Url(),
+			Status: ok,
+		},
+		Jobs: make([]TravisJob, count),
+	}
+
+	var wg sync.WaitGroup
+	wg.Add(count)
+
+	for i, r := range instance.Repos {
+		go func(index int, repo TravisRepository) {
+			defer wg.Done()
+			job, _ := instance.Client.Job(repo)
+			aggregation.Jobs[index] = job
+		}(i, r)
+	}
+
+	wg.Wait()
+
+	failedJobs := make([]TravisJob, 0)
+	for _, job := range aggregation.Jobs {
+		if !job.IsSuccessful() {
+			failedJobs = append(failedJobs, job)
+		}
+	}
+	aggregation.Jobs = failedJobs
+
+	return aggregation
+}
+
+func (d *Dashboard) GetBrokenTravisBuilds() []*TravisAggregation {
+	count := len(d.travisInstances)
+	aggregations := make([]*TravisAggregation, count)
+
+	var wg sync.WaitGroup
+	wg.Add(count)
+
+	for index, instance := range d.travisInstances {
+		go func(ix int, i *TravisInstance) {
+			defer wg.Done()
+			aggregations[ix] = getBrokenBuildsForTravisInstance(i)
+		}(index, instance)
+	}
+
+	wg.Wait()
+	return aggregations
 }
 
 // GetBrokenJenkinsBuilds retrieves the failed builds displayed on the Broken page from all configured JenkinsInstance's.
 func (d *Dashboard) GetBrokenJenkinsBuilds() []*JenkinsAggregation {
-	jenkinsAggregations := make([]*JenkinsAggregation, len(d.jenkinsInstances))
+	count := len(d.jenkinsInstances)
+	jenkinsAggregations := make([]*JenkinsAggregation, count)
 
 	var wg sync.WaitGroup
-	wg.Add(len(d.jenkinsInstances))
+	wg.Add(count)
 
 	for index, jenkinsInstance := range d.jenkinsInstances {
 		go func(instance *JenkinsInstance, index int) {
@@ -72,7 +113,6 @@ func (d *Dashboard) GetBrokenJenkinsBuilds() []*JenkinsAggregation {
 	}
 
 	wg.Wait()
-
 	return jenkinsAggregations
 }
 
@@ -82,9 +122,12 @@ func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggreg
 	}
 
 	jenkinsAggregation := &JenkinsAggregation{
-		Name:          instance.Name,
-		Url:           instance.Url,
-		Status:        ok,
+		Aggregation: Aggregation{
+			Type:   "jenkins",
+			Name:   instance.Name,
+			Url:    instance.Url,
+			Status: ok,
+		},
 		BrokenJobsUrl: instance.BrokenJobsUrl,
 	}
 
@@ -128,7 +171,7 @@ func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggreg
 		jobs, err := instance.Client.GetJobsFromViewWithTreeByPath(path+"/view/Broken", tree)
 		if err != nil {
 			log.Printf("[WARN] %s", err)
-			aggregation.Jobs = make([]Job, 0)
+			aggregation.Jobs = make([]JenkinsJob, 0)
 			aggregation.Status = failed
 			return
 		}

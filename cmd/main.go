@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"net/http"
-	//_ "net/http/pprof"
 	"os"
 	"os/user"
 	"time"
@@ -22,6 +21,7 @@ const (
 
 type Config struct {
 	Jenkins     []*dashboard.JenkinsInstance
+	Travis      []*dashboard.TravisInstance
 	Username    string
 	Password    string
 	Debug       bool
@@ -40,6 +40,8 @@ var (
 	Timeout = 30 * time.Second
 
 	dashboardEndpoint = "/dashboard"
+	jenkinsEndpoint   = dashboardEndpoint + "/jenkins"
+	travisEndpoint    = dashboardEndpoint + "/travis"
 	brokenBoard       *dashboard.Dashboard
 	config            *Config
 )
@@ -95,19 +97,13 @@ func readConfig() {
 		log.Printf("[INFO] No config file found. Using defaults.\n")
 	}
 
-	//viper.WatchConfig()
-	//viper.OnConfigChange(func(e fsnotify.Event) {
-	//	fmt.Println("Config file changed:", e.Name)
-	//})
-
-	jenkinsInstances := parseJenkinsInstanceConfig()
-
 	config = &Config{
 		Debug:       viper.GetBool("debug"),
 		BindAddress: viper.GetString("bindAddress"),
 		Username:    viper.GetString("username"),
 		Password:    viper.GetString("password"),
-		Jenkins:     jenkinsInstances,
+		Jenkins:     parseJenkinsInstanceConfig(),
+		Travis:      parseTravisInstanceConfig(),
 	}
 
 	if config.Debug {
@@ -117,8 +113,57 @@ func readConfig() {
 
 	dashboard.Debug = config.Debug
 }
+
+func parseTravisInstanceConfig() []*dashboard.TravisInstance {
+	var travisInstances []*dashboard.TravisInstance
+
+	type config struct {
+		AccessToken   string
+		Organizations []struct {
+			Name  string
+			Repos []struct {
+				Name   string
+				Branch string
+			}
+		}
+	}
+
+	var cfg config
+	err := viper.UnmarshalKey("travis", &cfg)
+	if err != nil {
+		log.Fatalln("Error while parsing Travis config:", err)
+	}
+
+	for _, org := range cfg.Organizations {
+		if org.Name == "" {
+			continue
+		}
+
+		client := dashboard.NewTravisClient(dashboard.TravisApiUrl, cfg.AccessToken)
+		travisInstance := &dashboard.TravisInstance{Client: client, Name: org.Name}
+
+		for _, r := range org.Repos {
+			if r.Name == "" {
+				continue
+			}
+
+			branch := r.Branch
+			if branch == "" {
+				branch = "master"
+			}
+
+			travisInstance.Repos = append(travisInstance.Repos,
+				dashboard.TravisRepository{Organization: org.Name, Name: r.Name, Branch: branch})
+
+		}
+		travisInstances = append(travisInstances, travisInstance)
+	}
+
+	return travisInstances
+}
+
 func parseJenkinsInstanceConfig() []*dashboard.JenkinsInstance {
-	jenkinsInstances := []*dashboard.JenkinsInstance{}
+	var jenkinsInstances []*dashboard.JenkinsInstance
 
 	jenkins := viper.Get("jenkins")
 	if jenkins != nil {
@@ -144,15 +189,15 @@ func parseJenkinsInstanceConfig() []*dashboard.JenkinsInstance {
 
 func main() {
 	readConfig()
-	brokenBoard = dashboard.Init(config.Jenkins, config.Username, config.Password)
+	brokenBoard = dashboard.Init(config.Jenkins, config.Travis, config.Username, config.Password)
 	initServer(config.BindAddress)
 }
 
 func initServer(bindAddress string) {
 	router := mux.NewRouter()
-	//attachProfiler(router)
 
-	router.HandleFunc(dashboardEndpoint, brokenBoardDataHandler).Methods(http.MethodGet)
+	router.HandleFunc(jenkinsEndpoint, jenkinsBoardHandler).Methods(http.MethodGet)
+	router.HandleFunc(travisEndpoint, travisBoardHandler).Methods(http.MethodGet)
 	router.PathPrefix("/static").Handler(http.StripPrefix("/static", http.FileServer(assetFS())))
 	router.Path("/").Handler(http.StripPrefix("/", http.FileServer(assetFS())))
 
@@ -172,9 +217,12 @@ func attachProfiler(router *mux.Router) {
 	router.PathPrefix("/debug/pprof/").Handler(http.DefaultServeMux)
 }
 
-func brokenBoardDataHandler(w http.ResponseWriter, r *http.Request) {
-	brokenJenkinsBuilds := brokenBoard.GetBrokenJenkinsBuilds()
-
+func travisBoardHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", contentTypeJSON)
-	json.NewEncoder(w).Encode(brokenJenkinsBuilds)
+	_ = json.NewEncoder(w).Encode(brokenBoard.GetBrokenTravisBuilds())
+}
+
+func jenkinsBoardHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", contentTypeJSON)
+	_ = json.NewEncoder(w).Encode(brokenBoard.GetBrokenJenkinsBuilds())
 }

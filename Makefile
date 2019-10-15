@@ -2,7 +2,7 @@
 .DEFAULT_GOAL:=help
 
 BINARY=camunda-ci-dashboard
-IMAGE_NAME=gcr.io/ci-30-162810/camunda-ci-dashboard:latest
+IMAGE_NAME=gcr.io/ci-30-162810/camunda-ci_camunda-ci-dashboard:latest
 DYNAMIC_COMPILE=0
 
 SHELL:=/bin/bash

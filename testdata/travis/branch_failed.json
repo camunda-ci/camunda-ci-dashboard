@@ -1,0 +1,32 @@
+{
+  "@type": "branch",
+  "@href": "/repo/10028514/branch/master",
+  "@representation": "standard",
+  "name": "master",
+  "repository": {
+    "@type": "repository",
+    "@href": "/repo/10028514",
+    "@representation": "minimal",
+    "id": 10028514,
+    "name": "camunda-bpm-assert-scenario",
+    "slug": "camunda/camunda-bpm-assert-scenario"
+  },
+  "default_branch": true,
+  "exists_on_github": true,
+  "last_build": {
+    "@type": "build",
+    "@href": "/build/596934039",
+    "@representation": "minimal",
+    "id": 596934039,
+    "number": "222",
+    "state": "failed",
+    "duration": 676,
+    "event_type": "cron",
+    "previous_state": "failed",
+    "pull_request_title": null,
+    "pull_request_number": null,
+    "started_at": "2019-10-12T09:24:01Z",
+    "finished_at": "2019-10-12T09:28:41Z",
+    "private": false
+  }
+}

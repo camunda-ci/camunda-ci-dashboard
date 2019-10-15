@@ -1,6 +1,6 @@
 # Camunda-CI Dashboard
 
-This package provides a biased Dashboard for Camunda-CIs Jenkins Broken Jobs board
+This package provides a biased Dashboard for Camunda-CIs Jenkins & Travis Broken Jobs board
 
 ## Build
 
@@ -12,7 +12,7 @@ Requirements:
 ```
 git clone https://github.com/camunda-ci/camunda-ci-dashboard
 cd camuda-ci-dashboard
-make docker-distro
+make package
 ```
 
 ## Usage
@@ -31,7 +31,41 @@ Binary:
 
 The Jenkins Username and Jenkins Password for Basic Auth can be set either using the cmdline flags, inside the `.camunda-ci-dashboard.json` config file or specified as environment variables.
 
-* CCD_USERNAME
-* CCD_PASSWORD
-* CCD_BINDADDRESS
-* CCD_DEBUG
+* `CCD_USERNAME`
+* `CCD_PASSWORD`
+* `CCD_BINDADDRESS`
+* `CCD_DEBUG`
+
+## Example Config
+
+```json
+{
+	"username": "<jenkins username>",
+	"password": "<jenkins password>",
+	"jenkins": {
+		"Release": {
+			"url": "https://release.cambpm.camunda.cloud"
+		},
+		"Docs": {
+			"url": "https://ci.cambpm.camunda.cloud",
+			"brokenJobsUrl": "https://ci.cambpm.camunda.cloud/job/docs"
+		}
+	},
+	"travis": {
+		"accessToken": "",
+		"organizations": [
+			{
+				"name": "camunda",
+				"repos": [
+					{
+						"name": "camunda-external-task-client-js"
+					},
+					{
+						"name": "camunda-bpm-assert-scenario"
+					}
+				]
+			}
+		]
+	}
+}
+```
