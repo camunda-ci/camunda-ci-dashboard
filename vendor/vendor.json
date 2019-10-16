@@ -15,6 +15,12 @@
 			"revisionTime": "2017-03-29T04:21:07Z"
 		},
 		{
+			"checksumSHA1": "p3IB18uJRs4dL2K5yx24MrLYE9A=",
+			"path": "github.com/google/go-querystring/query",
+			"revision": "c8c88dbee036db4e4808d1f2ec8c2e15e11c3f80",
+			"revisionTime": "2019-03-18T16:54:38Z"
+		},
+		{
 			"checksumSHA1": "zmCk+lgIeiOf0Ng9aFP9aFy8ksE=",
 			"path": "github.com/gorilla/mux",
 			"revision": "599cba5e7b6137d46ddf58fb1765f5d928e69604",
@@ -99,6 +105,12 @@
 			"revisionTime": "2017-04-05T01:41:05Z"
 		},
 		{
+			"checksumSHA1": "/x3sCZBfb2YeH4xtB7tZocX9Xv0=",
+			"path": "github.com/shuheiktgw/go-travis",
+			"revision": "7b94a8918afeb9c8ef36120ee29719e6ecf592be",
+			"revisionTime": "2019-08-17T08:28:25Z"
+		},
+		{
 			"checksumSHA1": "lBehULzb2/kIK3wZ0gz2yNmHq9s=",
 			"path": "github.com/spf13/afero",
 			"revision": "9be650865eab0c12963d8753212f4f9c66cdcf12",
@@ -139,7 +151,7 @@
 			"revisionTime": "2017-04-17T08:08:15Z"
 		},
 		{
-			"checksumSHA1": "ArDa4bMPKzhiS1I7iioemBwZ6tE=",
+			"checksumSHA1": "jRiEa4gFPrOdh1x6aqm7kXAXMWo=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "f3918c30c5c2cb527c0b071a27c35120a6c0719a",
 			"revisionTime": "2017-04-05T16:58:12Z"
@@ -169,13 +181,13 @@
 			"revisionTime": "2017-03-31T22:43:49Z"
 		},
 		{
-			"checksumSHA1": "ZbYsJjfj1rPbHN+0baD1rg09PXQ=",
+			"checksumSHA1": "+U+vu5UQXoIB4egXy7uX3GYBxVo=",
 			"path": "golang.org/x/text/unicode/cldr",
 			"revision": "f4b4367115ec2de254587813edaa901bc1c723a8",
 			"revisionTime": "2017-03-31T22:43:49Z"
 		},
 		{
-			"checksumSHA1": "gYoNrZgxCQAHutg2rGHcFoKJtpA=",
+			"checksumSHA1": "cCdfq19OZBMVpK2zs73XdGpi1SU=",
 			"path": "golang.org/x/text/unicode/norm",
 			"revision": "f4b4367115ec2de254587813edaa901bc1c723a8",
 			"revisionTime": "2017-03-31T22:43:49Z"

@@ -1,0 +1,32 @@
+{
+	"@type": "branch",
+	"@href": "/repo/18035658/branch/master",
+	"@representation": "standard",
+	"name": "master",
+	"repository": {
+		"@type": "repository",
+		"@href": "/repo/18035658",
+		"@representation": "minimal",
+		"id": 18035658,
+		"name": "camunda-external-task-client-js",
+		"slug": "camunda/camunda-external-task-client-js"
+	},
+	"default_branch": true,
+	"exists_on_github": true,
+	"last_build": {
+		"@type": "build",
+		"@href": "/build/579688290",
+		"@representation": "minimal",
+		"id": 579688290,
+		"number": "191",
+		"state": "passed",
+		"duration": 257,
+		"event_type": "push",
+		"previous_state": "passed",
+		"pull_request_title": null,
+		"pull_request_number": null,
+		"started_at": "2019-09-02T08:21:30Z",
+		"finished_at": "2019-09-02T08:23:04Z",
+		"private": false
+	}
+}

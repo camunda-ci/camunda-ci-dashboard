@@ -9,3 +9,4 @@ dashboard-env.sh
 bin
 bindata_assetfs.go
 upx
+cover.*

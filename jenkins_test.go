@@ -24,7 +24,7 @@ func TestJenkinsClient_GetQueue_Request(t *testing.T) {
 }
 
 func TestJenkinsClient_GetQueue_Response(t *testing.T) {
-	server := mockSuccesfulResponseWithBodyFromFile("testdata/queue.json", t)
+	server := mockSuccesfulResponseWithBodyFromFile("testdata/jenkins/queue.json", t)
 	defer server.Close()
 
 	jenkins := createTestJenkinsClient(server)
@@ -33,7 +33,7 @@ func TestJenkinsClient_GetQueue_Response(t *testing.T) {
 	assertNoError(err, t, "queue")
 
 	if len(queue.Items) != 28 {
-		t.Fatal("Queue size is wrong.")
+		t.Fatal("JenkinsQueue size is wrong.")
 	}
 }
 
@@ -50,7 +50,7 @@ func TestJenkinsClient_GetJobsFromView_Request(t *testing.T) {
 }
 
 func TestJenkinsClient_GetJobsFromView_Response(t *testing.T) {
-	server := mockSuccesfulResponseWithBodyFromFile("testdata/view_broken_depth3.json", t)
+	server := mockSuccesfulResponseWithBodyFromFile("testdata/jenkins/view_broken_depth3.json", t)
 	defer server.Close()
 
 	jobs, err := createTestJenkinsClient(server).
@@ -61,7 +61,7 @@ func TestJenkinsClient_GetJobsFromView_Response(t *testing.T) {
 }
 
 func TestJenkinsClient_GetJobsFromNonExistingView(t *testing.T) {
-	server := mockFailureResponseWithBodyFromFile(http.StatusInternalServerError, "text/html", "testdata/view_does_not_exist.html", t)
+	server := mockFailureResponseWithBodyFromFile(http.StatusInternalServerError, "text/html", "testdata/jenkins/view_does_not_exist.html", t)
 	defer server.Close()
 
 	jobs, err := createTestJenkinsClient(server).
@@ -87,7 +87,7 @@ func TestJenkinsClient_GetJobsFromViewWithTree_Request(t *testing.T) {
 
 func TestJenkinsClient_GetJobsFromViewWithTree_Response(t *testing.T) {
 	// Test makes not so much sense because it relies on the Jenkins doing its thing
-	server := mockSuccesfulResponseWithBodyFromFile("testdata/view_broken_depth3.json", t)
+	server := mockSuccesfulResponseWithBodyFromFile("testdata/jenkins/view_broken_depth3.json", t)
 	defer server.Close()
 
 	jobs, err := createTestJenkinsClient(server).
@@ -110,7 +110,7 @@ func TestJenkinsClient_GetOverallLoad_Request(t *testing.T) {
 }
 
 func TestJenkinsClient_GetOverallLoad_Response(t *testing.T) {
-	server := mockSuccesfulResponseWithBodyFromFile("testdata/overallLoad_depth3.json", t)
+	server := mockSuccesfulResponseWithBodyFromFile("testdata/jenkins/overallLoad_depth3.json", t)
 	defer server.Close()
 
 	overallLoad, err := createTestJenkinsClient(server).
@@ -133,7 +133,7 @@ func TestJenkinsClient_GetExecutors_Request(t *testing.T) {
 }
 
 func TestJenkinsClient_GetExecutors_Response(t *testing.T) {
-	server := mockSuccesfulResponseWithBodyFromFile("testdata/computer.json", t)
+	server := mockSuccesfulResponseWithBodyFromFile("testdata/jenkins/computer.json", t)
 	defer server.Close()
 
 	executors, err := createTestJenkinsClient(server).
@@ -163,7 +163,7 @@ func TestJenkinsClient_GetBusyExecutors_Request(t *testing.T) {
 }
 
 func TestJenkinsClient_GetBusyExecutors_Response(t *testing.T) {
-	server := mockSuccesfulResponseWithBodyFromFile("testdata/computer.json", t)
+	server := mockSuccesfulResponseWithBodyFromFile("testdata/jenkins/computer.json", t)
 	defer server.Close()
 
 	busyExecutors, err := createTestJenkinsClient(server).
@@ -254,13 +254,13 @@ func assertHttpStatusError(err error, expectedStatusCode int, t *testing.T) {
 	}
 }
 
-func assertSizeOf(v []Job, expectedSize int, t *testing.T) {
+func assertSizeOf(v []JenkinsJob, expectedSize int, t *testing.T) {
 	if len(v) != expectedSize {
 		t.Errorf("Expected size of %d, got %d.\n%+v", expectedSize, len(v), v)
 	}
 }
 
-func assertOverallLoadValues(overallLoad *OverallLoad, t *testing.T) {
+func assertOverallLoadValues(overallLoad *JenkinsOverallLoad, t *testing.T) {
 	if overallLoad.AvailableExecutors.Hour.Latest != 0.0 {
 		t.Errorf("Wrong number of available executors")
 	}

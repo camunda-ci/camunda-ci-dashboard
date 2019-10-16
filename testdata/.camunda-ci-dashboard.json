@@ -1,8 +1,0 @@
-{
-	"jenkins": {
-		"Jenkins.io": {
-			"url": "https://ci.jenkins.io",
-			"brokenJobsUrl": "https://ci.jenkins.io/job/7.8"
-		}
-	}
-}
