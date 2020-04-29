@@ -176,6 +176,9 @@ func parseJenkinsInstanceConfig() []*dashboard.JenkinsInstance {
 			url := v.(map[string]interface{})["url"].(string)
 			jenkinsInstance.Url = url
 
+			publicUrl := v.(map[string]interface{})["publicurl"].(string)
+			jenkinsInstance.PublicUrl = publicUrl
+
 			if brokenJobsUrl, ok := v.(map[string]interface{})["brokenjobsurl"]; ok {
 				jenkinsInstance.BrokenJobsUrl = brokenJobsUrl.(string)
 			}

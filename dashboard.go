@@ -129,6 +129,7 @@ func getBrokenBuildsForJenkinsInstance(instance *JenkinsInstance) *JenkinsAggreg
 			Status: ok,
 		},
 		BrokenJobsUrl: instance.BrokenJobsUrl,
+		PublicUrl:     instance.PublicUrl,
 	}
 
 	var wg sync.WaitGroup

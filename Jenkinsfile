@@ -1,2 +1,2 @@
-@Library("camunda-internal") _
+@Library("camunda-ci") _
 buildDockerImage([registry: 'ci'])
