@@ -28,6 +28,7 @@ type JenkinsInstance struct {
 	Name          string
 	Url           string
 	BrokenJobsUrl string
+	PublicUrl     string
 	Client        Jenkins
 }
 
@@ -40,6 +41,7 @@ type JenkinsAggregations struct {
 type JenkinsAggregation struct {
 	Aggregation
 	BrokenJobsUrl  string       `json:"brokenJobsUrl"`
+	PublicUrl      string       `json:"publicUrl"`
 	BusyExecutors  int          `json:"busyExecutors"`
 	BuildQueueSize int          `json:"buildQueueSize"`
 	Jobs           []JenkinsJob `json:"jobs"`
