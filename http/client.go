@@ -243,6 +243,7 @@ func createRequest(ctx context.Context, baseURL string, endpoint string, method 
 
 	request.Header.Set("Content-Type", jsonType)
 	request.Header.Set("Accept", jsonType)
+	request.Header.Set("X-Vouch-IdP-Claims-preferred_username", username)
 
 	if username != "" && password != "" {
 		request.SetBasicAuth(username, password)
