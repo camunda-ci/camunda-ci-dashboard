@@ -45,12 +45,12 @@ The Jenkins Username and Jenkins Password for Basic Auth can be set either using
 	"jenkins": {
 		"Release": {
 			"url": "http://release-cambpm-ui:8080",
-                        "publicUrl": "https://release.cambpm.camunda.cloud"
+			"publicUrl": "https://release.cambpm.camunda.cloud"
 		},
 		"Docs": {
 			"url": "http://ci-cambpm-ui:8080",
 			"brokenJobsUrl": "http://ci-cambpm-ui:8080/job/docs",
-                        "publicUrl": "https://ci.cambpm.camunda.cloud/job/docs"
+			"publicUrl": "https://ci.cambpm.camunda.cloud/job/docs"
 		}
 	},
 	"travis": {
