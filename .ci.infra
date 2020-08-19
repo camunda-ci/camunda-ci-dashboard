@@ -2,4 +2,4 @@
 
 @Library('camunda-ci') _
 
-buildDockerImageWithMakefile([registry: 'ci'])
+buildDockerImage([registry: 'ci-v2'])
