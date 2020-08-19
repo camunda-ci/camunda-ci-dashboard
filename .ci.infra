@@ -1,0 +1,5 @@
+#!/usr/bin/env groovy
+
+@Library('camunda-ci') _
+
+buildDockerImage([registry: 'ci'])
